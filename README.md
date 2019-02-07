@@ -16,7 +16,9 @@ This Fork changes the following:
 * If an audio file is missing its lyrics file, it is colored blue. Tapping on it leads you to the creation screen, and also automatically loads the song
 * Free dark mode. (Sorry, I just had to)
 
-(These links link to the original app on the play store, not the forked version)
+
+(The links below link to the original app on the play store, not the forked version)
+
 [![Say: Thanks](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://play.google.com/store/apps/details?id=com.cg.lrceditor)
 
 An Android App that helps you to create and edit .lrc files easily
