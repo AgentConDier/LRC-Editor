@@ -96,6 +96,9 @@ public class FinalizeActivity extends AppCompatActivity {
         uri = intent.getParcelableExtra("URI");
         lrcFileName = intent.getStringExtra("LRC FILE NAME");
         songFileName = intent.getStringExtra("SONG FILE NAME");
+        if (intent.getParcelableExtra("LRC URI") != null) {
+            saveUri = intent.getParcelableExtra("LRC URI");
+        }
 
         songName = findViewById(R.id.songName_edittext);
         artistName = findViewById(R.id.artistName_edittext);
@@ -151,9 +154,9 @@ public class FinalizeActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        saveLocation = preferences.getString("saveLocation", Environment.getExternalStorageDirectory().getPath() + "/Lyrics");
+        saveLocation = preferences.getString("saveLocation", Environment.getExternalStorageDirectory().getPath() + "/Music");
         String uriString = preferences.getString("saveUri", null);
-        if (uriString != null)
+        if (uriString != null && saveUri == null)
             saveUri = Uri.parse(uriString);
 
         if (dialogView != null) {
@@ -205,13 +208,16 @@ public class FinalizeActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
 
-                        final String path;
+                        String path;
                         if (saveUri != null) {
-                            path = FileUtil.getFullPathFromTreeUri(saveUri, ctx);
+                            try {
+                                path = FileUtil.getFullPathFromTreeUri(saveUri, ctx);
+                            } catch (IllegalArgumentException e) {
+                                path = "path unavailable";
+                            }
                         } else {
                             path = saveLocation;
                         }
-
                         String fileName = editText.getText().toString();
                         if (fileName.endsWith(".lrc"))
                             fileName = fileName.substring(0, fileName.lastIndexOf('.'));
@@ -264,7 +270,8 @@ public class FinalizeActivity extends AppCompatActivity {
     }
 
     private void writeLyricsExternal(String fileName) {
-        DocumentFile pickedDir;
+        DocumentFile pickedDir = DocumentFile.fromFile(new File(saveLocation));
+        DocumentFile file = null;
         try {
             pickedDir = DocumentFile.fromTreeUri(this, saveUri);
             try {
@@ -273,10 +280,21 @@ public class FinalizeActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         } catch (IllegalArgumentException | NullPointerException e) {
-            pickedDir = DocumentFile.fromFile(new File(saveLocation));
+            try {
+                file = DocumentFile.fromSingleUri(this, saveUri);
+                try { // Am I doing this right?
+                    getContentResolver().takePersistableUriPermission(saveUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                } catch (SecurityException ex) {
+                    ex.printStackTrace();
+                }
+            } catch (IllegalArgumentException | NullPointerException ex) {
+                file = null;
+            }
         }
 
-        DocumentFile file = pickedDir.createFile("application/*", fileName + ".lrc");
+        if (file == null) {
+            file = pickedDir.createFile("application/*", fileName + ".lrc");
+        }
         try {
             OutputStream out = getContentResolver().openOutputStream(file.getUri());
             InputStream in = new ByteArrayInputStream(lyricsToString().getBytes("UTF-8"));
@@ -291,7 +309,7 @@ public class FinalizeActivity extends AppCompatActivity {
             out.flush();
             out.close();
 
-            saveSuccessful(fileName);
+            saveSuccessful(file.getUri().toString());
 
         } catch (IOException | NullPointerException e) {
             e.printStackTrace();
@@ -328,10 +346,10 @@ public class FinalizeActivity extends AppCompatActivity {
         resultTextView.setTextColor(Color.rgb(45, 168, 26));
         if (overwriteFailed)
             resultTextView.setText(String.format(Locale.getDefault(), "Successfully wrote the lyrics file at %s",
-                    saveLocation + "/" + fileName + "<suffix> .lrc"));
+                    fileName));
         else
             resultTextView.setText(String.format(Locale.getDefault(), "Successfully wrote the lyrics file at %s",
-                    saveLocation + "/" + fileName + ".lrc"));
+                    fileName));
     }
 
     private String lyricsToString() {
@@ -371,19 +389,32 @@ public class FinalizeActivity extends AppCompatActivity {
     }
 
     public void setAsSongFileName(View view) {
-        EditText editText = dialogView.findViewById(R.id.dialog_edittext);
+        String name;
         try {
             if (songFileName.contains("."))
-                editText.setText(songFileName.substring(0, songFileName.lastIndexOf('.')) + ".lrc");
+                name = songFileName.substring(0, songFileName.lastIndexOf('.')) + ".lrc";
             else
-                editText.setText(songFileName + ".lrc");
+                name = songFileName + ".lrc";
         } catch (IndexOutOfBoundsException e) {
-            editText.setText(songFileName + ".lrc");
+            name = songFileName + ".lrc";
         }
+        EditText editText = dialogView.findViewById(R.id.dialog_edittext);
+        File f = new File(name);
+        editText.setText(f.getName());
+
+        saveUri = null;
+        saveLocation = f.getParentFile().getAbsolutePath();
     }
 
     public void setAsLRCFileName(View view) {
-        ((EditText) dialogView.findViewById(R.id.dialog_edittext)).setText(lrcFileName);
+        //((EditText) dialogView.findViewById(R.id.dialog_edittext)).setText(lrcFileName);
+        File lrcfile = new File(lrcFileName);
+        if (lrcfile.exists()) {
+            ((EditText) dialogView.findViewById(R.id.dialog_edittext)).setText(lrcfile.getName());
+            saveUri = null;
+            saveLocation = lrcfile.getParentFile().getAbsolutePath();
+        }
+
     }
 
     private boolean grantPermission() {
