@@ -70,10 +70,11 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
-        String location = preferences.getString("saveLocation", Environment.getExternalStorageDirectory().getPath() + "/Lyrics");
+        String location = preferences.getString("saveLocation", Environment.getExternalStorageDirectory().getPath() + "/Music");
         saveLocation.setText(location);
 
-        if (preferences.getString("lrceditor_purchased", "").equals("Y")) {
+        //(preferences.getString("lrceditor_purchased", "").equals("Y")) { // Sorry, I just had to...
+        if (true) {
             TextView themeTitle = findViewById(R.id.theme_title);
             RadioGroup themeGroup = findViewById(R.id.theme_group);
 

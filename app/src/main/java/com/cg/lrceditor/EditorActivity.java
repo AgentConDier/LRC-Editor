@@ -12,8 +12,10 @@ import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.provider.OpenableColumns;
+import android.support.v4.provider.DocumentFile;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
@@ -49,6 +51,8 @@ public class EditorActivity extends AppCompatActivity implements LyricListAdapte
         MediaPlayer.OnCompletionListener {
 
     private static final int FILE_REQUEST = 1;
+    private final String defaultSaveLocation = Environment.getExternalStorageDirectory().getPath() + "/Music";
+    private String saveLocation;
 
     private RecyclerView mRecyclerView;
     private LinearLayoutManager linearLayoutManager;
@@ -64,6 +68,7 @@ public class EditorActivity extends AppCompatActivity implements LyricListAdapte
     private boolean isDarkTheme = false;
 
     private Uri uri = null;
+    private Uri lrcUri = null;
     private String lrcFileName = null;
     private String songFileName = null;
 
@@ -216,7 +221,10 @@ public class EditorActivity extends AppCompatActivity implements LyricListAdapte
 
             songMetaData = r.getSongMetaData();
 
-            lrcFileName = getFileName(intent.getData());
+            saveLocation = preferences.getString("saveLocation", defaultSaveLocation);
+            lrcFileName = getFileName(intent.getData(), saveLocation);
+            DocumentFile d = DocumentFile.fromSingleUri(this, intent.getData());
+            lrcUri = d.getUri();
         } else {                        /* New LRC file or existing opened from the homepage */
             String[] lyrics = intent.getStringArrayExtra("LYRICS");
             String[] timestamps = intent.getStringArrayExtra("TIMESTAMPS");
@@ -225,6 +233,7 @@ public class EditorActivity extends AppCompatActivity implements LyricListAdapte
             songMetaData = (SongMetaData) intent.getSerializableExtra("SONG METADATA");
 
             lrcFileName = intent.getStringExtra("LRC FILE NAME");
+            songFileName = intent.getStringExtra("SONG FILE NAME");
         }
 
         mRecyclerView = findViewById(R.id.recyclerview);
@@ -264,6 +273,29 @@ public class EditorActivity extends AppCompatActivity implements LyricListAdapte
         seekbar.setOnSeekBarChangeListener(this);
 
         flasher.post(flash);
+
+        // If the song is already known, load it
+        if (songFileName != null) {
+            File songFile = new File(songFileName);
+            if (songFile.exists()) {
+                readyMediaPlayer(DocumentFile.fromFile(songFile).getUri());
+            }
+        } /*else if (lrcUri != null && songMetaData.songName != null){
+            String nam = songMetaData.songName;
+            Log.d("SoundSearch", "starting to look at name "+nam);
+            if (nam.endsWith(".lrc")) {
+                nam = nam.substring(0, nam.lastIndexOf('.'));
+            }
+            DocumentFile p = DocumentFile.fromSingleUri(this, lrcUri).getParentFile();
+                                                                      ^-- returns null
+            DocumentFile mp3 = p.findFile(nam+".mp3");
+            DocumentFile m4a = p.findFile(nam+".m4a");
+            if (mp3 != null) {
+                readyMediaPlayer(mp3.getUri());
+            } else if (m4a != null) {
+                readyMediaPlayer(m4a.getUri());
+            }
+        }*/
     }
 
     private ArrayList<ItemData> populateDataSet(String[] lyrics, String[] timestamps) {
@@ -529,13 +561,13 @@ public class EditorActivity extends AppCompatActivity implements LyricListAdapte
         player.prepareAsync();
     }
 
-    public String getFileName(Uri uri) {
+    public String getFileName(Uri uri, String location) {
         String result = null;
         if (uri.getScheme().equals("content")) {
             Cursor cursor = getContentResolver().query(uri, null, null, null, null);
             try {
                 if (cursor != null && cursor.moveToFirst()) {
-                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                    result = location + cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
                 }
             } finally {
                 cursor.close();
@@ -543,10 +575,6 @@ public class EditorActivity extends AppCompatActivity implements LyricListAdapte
         }
         if (result == null) {
             result = uri.getPath();
-            int cut = result.lastIndexOf('/');
-            if (cut != -1) {
-                result = result.substring(cut + 1);
-            }
         }
         return result;
     }
@@ -592,7 +620,7 @@ public class EditorActivity extends AppCompatActivity implements LyricListAdapte
         seekbar.setProgress(0);
         songTimeUpdater.post(updateSongTime);
 
-        songFileName = getFileName(uri);
+        songFileName = getFileName(uri, saveLocation);
     }
 
     public void rewind5(View view) {
@@ -1248,6 +1276,7 @@ public class EditorActivity extends AppCompatActivity implements LyricListAdapte
                 Intent intent = new Intent(this, FinalizeActivity.class);
                 intent.putExtra("lyricData", (ArrayList<ItemData>) mAdapter.lyricData);
                 intent.putExtra("URI", uri);
+                intent.putExtra("LRC URI", lrcUri);
                 intent.putExtra("SONG METADATA", songMetaData);
                 intent.putExtra("SONG FILE NAME", songFileName);
                 intent.putExtra("LRC FILE NAME", lrcFileName);

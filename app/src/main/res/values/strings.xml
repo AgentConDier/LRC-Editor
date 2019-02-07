@@ -86,4 +86,7 @@
     <string name="decrease_timestamp_button_hint">Decrease timestamp button</string>
     <string name="increase_timestamp_button_hint">Increase timestamp button</string>
     <string name="github_contribution_string">Contribute to the app: https://github.com/Spikatrix/LRC_Editor</string>
+    <string name="files_both"> </string>
+    <string name="files_lrc">Missing audio file</string>
+    <string name="files_audio">Missing .lrc file</string>
 </resources>
