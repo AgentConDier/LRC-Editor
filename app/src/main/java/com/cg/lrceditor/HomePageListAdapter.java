@@ -170,7 +170,7 @@ public class HomePageListAdapter extends RecyclerView.Adapter<HomePageListAdapte
                       by selecting multiple elements (Bug?)
                     */
                     holder.itemView.setBackgroundResource(R.drawable.bg_list_row);
-                    holder.statusText.setText(R.string.files_both);
+                    holder.statusText.setVisibility(View.GONE);
                     break;
                 case LRC:
                     holder.itemView.setBackgroundResource(R.drawable.bg_list_row_noaudio);
