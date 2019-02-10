@@ -15,6 +15,8 @@
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
 -keepattributes *Annotation*,SourceFile,LineNumberTable
+-dontwarn org.xmlpull.v1.**
+-keep class org.xmlpull.v1.** { *; }
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.

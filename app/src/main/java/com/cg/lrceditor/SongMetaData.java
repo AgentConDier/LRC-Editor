@@ -5,7 +5,7 @@ import java.io.Serializable;
 public class SongMetaData implements Serializable {
     private String artistName = "";
     private String albumName = "";
-    private String songName = "";
+    public String songName = "";
     private String composerName = "";
 
     public String getSongName() {

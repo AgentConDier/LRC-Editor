@@ -10,13 +10,15 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 public class CreateActivity extends AppCompatActivity {
-
+    private String songName = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         SharedPreferences preferences = getSharedPreferences("LRC Editor Preferences", MODE_PRIVATE);
         if (preferences.getString("current_theme", "").equals("dark")) {
             setTheme(R.style.AppThemeDark);
         }
+
+        songName = getIntent().getStringExtra("SONG FILE NAME");
 
         try {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -45,6 +47,7 @@ public class CreateActivity extends AppCompatActivity {
         Intent intent = new Intent(this, EditorActivity.class);
         intent.putExtra("LYRICS", data.split("\\n"));
         intent.putExtra("TIMESTAMPS", timestamps);
+        intent.putExtra("SONG FILE NAME", songName);
         startActivity(intent);
     }
 

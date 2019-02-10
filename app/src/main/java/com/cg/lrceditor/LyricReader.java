@@ -28,8 +28,8 @@ public class LyricReader {
 
     private InputStream in = null;
 
-    LyricReader(String path, String filename) {
-        f = new File(path, filename);
+    LyricReader(File f_) {
+        f = f_;
     }
 
     LyricReader(Uri uri, Context c) {

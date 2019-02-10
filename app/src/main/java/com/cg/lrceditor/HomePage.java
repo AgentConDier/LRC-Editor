@@ -23,6 +23,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,7 +40,7 @@ import java.util.List;
 public class HomePage extends AppCompatActivity implements HomePageListAdapter.LyricFileSelectListener {
 
     private static final int WRITE_EXTERNAL_REQUEST = 1;
-    private final String defaultSaveLocation = Environment.getExternalStorageDirectory().getPath() + "/Lyrics";
+    private final String defaultSaveLocation = Environment.getExternalStorageDirectory().getPath() + "/Music";
     private boolean storagePermissionAlreadyGranted = false;
     private boolean scannedOnce = false;
     private String saveLocation;
@@ -164,18 +165,12 @@ public class HomePage extends AppCompatActivity implements HomePageListAdapter.L
                 return;
             }
             if (count > 0) {
-                boolean lyricsAvailable = false;
-                for (File file : f.listFiles())
-                    if (file.getName().endsWith(".lrc")) {
-                        lyricsAvailable = true;
-                        break;
-                    }
-
-                if (lyricsAvailable) {
+                LinkedList<File> list = scan_directory(f);
+                if (list.size() > 0) {
                     empty_textview.setVisibility(View.GONE);
                     r.setVisibility(View.VISIBLE);
 
-                    ready_recyclerView(f);
+                    ready_recyclerView(list);
                 } else {
                     empty_textview.setVisibility(View.VISIBLE);
                     r.setVisibility(View.GONE);
@@ -187,17 +182,8 @@ public class HomePage extends AppCompatActivity implements HomePageListAdapter.L
         }
     }
 
-    private void ready_recyclerView(File f) {
+    private void ready_recyclerView(LinkedList<File> list) {
         RecyclerView recyclerView = findViewById(R.id.recyclerview);
-
-        LinkedList<File> list = new LinkedList<>();
-        File[] fileList = f.listFiles();
-        Arrays.sort(fileList);
-        for (File file : fileList) {
-            if (file.getName().endsWith(".lrc")) {
-                list.addLast(file);
-            }
-        }
 
         if (mAdapter == null) {
             mAdapter = new HomePageListAdapter(this, list);
@@ -205,6 +191,7 @@ public class HomePage extends AppCompatActivity implements HomePageListAdapter.L
             mAdapter.setClickListener(this);
         } else {
             mAdapter.mFileList = list;
+            mAdapter.map_status();
             mAdapter.notifyDataSetChanged();
         }
 
@@ -221,6 +208,27 @@ public class HomePage extends AppCompatActivity implements HomePageListAdapter.L
         scannedOnce = true;
     }
 
+    LinkedList<File> scan_directory(File dir) { // recursively looks for .lrc files
+        LinkedList<File> list = new LinkedList<>();
+        File[] fileList = dir.listFiles();
+        Arrays.sort(fileList);
+        for (File file : fileList) {
+            if (file.isDirectory()) {
+                list.addAll(list.size(), scan_directory(file));
+
+            /*
+              this also lists music files, enabling the user an overview of songs without
+              lyrics in their music collection
+            */
+            } else if (file.getName().endsWith(".lrc") ||
+                       file.getName().endsWith(".mp3") ||
+                       file.getName().endsWith(".m4a")) {
+                list.addLast(file);
+            }
+        }
+        return list;
+    }
+
     private void ready_fileIO() {
         if (!isExternalStorageWritable()) {
             Toast.makeText(this, "ERROR: Storage unavailable/busy", Toast.LENGTH_LONG).show();
@@ -228,7 +236,7 @@ public class HomePage extends AppCompatActivity implements HomePageListAdapter.L
             return;
         }
 
-        if (Build.VERSION.SDK_INT < 23 || grantPermission()) /* 23 = Marshmellow */
+        if (Build.VERSION.SDK_INT < 23 || grantPermission()) /* 23 = Marshmallow */
             storagePermissionAlreadyGranted = true;
     }
 
@@ -320,20 +328,39 @@ public class HomePage extends AppCompatActivity implements HomePageListAdapter.L
     }
 
     @Override
-    public void fileSelected(String fileName) {
-        LyricReader r = new LyricReader(saveLocation, fileName);
-        if (!r.readLyrics()) {
-            Toast.makeText(this, r.getErrorMsg(), Toast.LENGTH_LONG).show();
-            return;
+    public void fileSelected(File file) {
+
+        String fileName = file.getAbsolutePath();
+
+        // If an audio file missing a .lrc file was selected, create a new lrc file
+        if (fileName.endsWith(".mp3") || fileName.endsWith(".m4a")) {
+            Intent intent = new Intent(HomePage.this, CreateActivity.class);
+            // pass song because it is already known
+            intent.putExtra("SONG FILE NAME", fileName);
+            startActivity(intent);
+        } else {
+            Intent intent = new Intent(this, EditorActivity.class);
+            LyricReader r = new LyricReader(file);
+            if (!r.readLyrics()) {
+                Toast.makeText(this, r.getErrorMsg(), Toast.LENGTH_LONG).show();
+                return;
+            }
+            intent.putExtra("LYRICS", r.getLyrics());
+            intent.putExtra("TIMESTAMPS", r.getTimestamps());
+            intent.putExtra("SONG METADATA", r.getSongMetaData());
+
+            // Automatically look for the corresponding song
+            String m4a = fileName.substring(0,fileName.length()-4);
+            String mp3 = m4a+".mp3";
+            m4a += ".m4a"; // saves 1 variable assignment
+            if (new File(mp3).exists()) {
+                intent.putExtra("SONG FILE NAME", mp3);
+            } else if (new File(m4a).exists()) {
+                intent.putExtra("SONG FILE NAME", m4a);
+            }
+            intent.putExtra("LRC FILE NAME", fileName);
+            startActivity(intent);
         }
-
-        Intent intent = new Intent(this, EditorActivity.class);
-        intent.putExtra("LYRICS", r.getLyrics());
-        intent.putExtra("TIMESTAMPS", r.getTimestamps());
-        intent.putExtra("SONG METADATA", r.getSongMetaData());
-        intent.putExtra("LRC FILE NAME", fileName);
-
-        startActivity(intent);
     }
 
     @Override
