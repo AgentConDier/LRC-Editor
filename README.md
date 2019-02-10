@@ -16,6 +16,8 @@ This Fork changes the following:
 * If an audio file is missing its lyrics file, it is colored blue. Tapping on it leads you to the creation screen, and also automatically loads the song
 * Free dark mode. (Sorry, I just had to)
 
+If you don't want to compile this yourself, head over to [releases](https://github.com/AgentConDier/LRC-Editor/releases)!
+
 
 (The links below link to the original app on the play store, not the forked version)
 
