@@ -5,7 +5,9 @@
 This is an in-progress rewrite of my previous fork, aiming to recreate the features I added while incorporating recent changes by Spikatrix. See [the progress tracking issue](https://github.com/AgentConDier/LRC-Editor/issues/3)
 
 
+
 (original links below)
+
 [![Say: Thanks](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://play.google.com/store/apps/details?id=com.cg.lrceditor)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
