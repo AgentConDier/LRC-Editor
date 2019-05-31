@@ -93,16 +93,14 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
-        String location = preferences.getString("saveLocation", Environment.getExternalStorageDirectory().getPath() + "/Lyrics");
+        String location = preferences.getString("saveLocation", Constants.defaultSaveLocation);
         saveLocation.setText(location);
 
-        if (preferences.getString("lrceditor_purchased", "").equals("Y")) {
-            TextView themeTitle = findViewById(R.id.theme_title);
-            RadioGroup themeGroup = findViewById(R.id.theme_group);
+        TextView themeTitle = findViewById(R.id.theme_title);
+        RadioGroup themeGroup = findViewById(R.id.theme_group);
 
-            themeTitle.setVisibility(View.VISIBLE);
-            themeGroup.setVisibility(View.VISIBLE);
-        }
+        themeTitle.setVisibility(View.VISIBLE);
+        themeGroup.setVisibility(View.VISIBLE);
     }
 
     public void changeSaveLocation(View view) {

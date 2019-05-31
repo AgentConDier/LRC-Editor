@@ -9,5 +9,5 @@ public class Constants {
 
     public static final long MAX_TIMESTAMP_VALUE = Timestamp.MAX_TIMESTAMP_VALUE;
 
-    public static final String defaultSaveLocation = Environment.getExternalStorageDirectory().getPath() + "/Lyrics";
+    public static final String defaultSaveLocation = Environment.getExternalStorageDirectory().getPath() + "/Music";
 }

@@ -164,7 +164,7 @@ public class FinalizeActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        saveLocation = preferences.getString("saveLocation", Environment.getExternalStorageDirectory().getPath() + "/Lyrics");
+        saveLocation = preferences.getString("saveLocation", Constants.defaultSaveLocation);
         String uriString = preferences.getString("saveUri", null);
         if (uriString != null)
             saveUri = Uri.parse(uriString);
