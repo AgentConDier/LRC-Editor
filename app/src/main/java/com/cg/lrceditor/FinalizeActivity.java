@@ -374,7 +374,7 @@ public class FinalizeActivity extends AppCompatActivity {
                 if (lyric == null || lyric.equals("")) {
                     lyric = " ";
                 }
-                sb.append("[").append(timestamp.toString()).append("]").append(lyric).append("\n");
+                sb.append("[").append(timestamp.toString()).append("0]").append(lyric).append("\n");
             }
         }
 
