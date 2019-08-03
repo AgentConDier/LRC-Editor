@@ -4,7 +4,7 @@
 ### Fork by AgentConDier [discontinued]
 This is used to be an in-progress rewrite of my previous fork, aiming to recreate the features I added while incorporating recent changes by Spikatrix. See [the progress tracking issue](https://github.com/AgentConDier/LRC-Editor/issues/3)
 
-Since the latest update added a recursive file list and included a lot of other fixes, I decided to create a python script to keep track of associating music- and lrc files instead of having to modify the app everytime it updates. I will still create a fork with the ability to include the music file path in the intent though, because there is currently no way to automatically load a song when opening the editor.
+Since the latest update added a recursive file list and included a lot of other fixes, I decided to create a python script to keep track of associating music- and lrc files instead of having to modify the app everytime it updates. I still created the branch [music-autoload](https://github.com/AgentConDier/LRC-Editor/tree/music-autoload) to add functionality for automatically loading a song when opening the editor.
 
 
 
