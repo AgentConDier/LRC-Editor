@@ -126,9 +126,9 @@
     <string name="composer_name_hint">Composer name here</string>
     <string name="processing">Processing</string>
     <string name="failed_to_extract_metadata_message">Failed to extract media metadata</string>
-    <string name="overwrite_prompt">File \'%1$s.lrc\' already exists in %2$s. Are you sure you want to overwrite it?</string>
+    <string name="overwrite_prompt">File \'%1$s\' already exists in %2$s. Are you sure you want to overwrite it?</string>
     <string name="attempting_to_overwrite_message">Attempting to overwrite previous file</string>
-    <string name="failed_to_overwrite_message">Failed to overwrite file; Suffix will be appended to the file name</string>
+    <string name="failed_to_overwrite_message">Failed to overwrite file. Please try again with an unused file name.</string>
     <string name="writing_lyrics_message">Writing the lyrics to the file</string>
     <string name="whoops_error">Whoops! An error occurred!</string>
     <string name="save_successful">Successfully saved the lyrics file in %1$s</string>
@@ -147,6 +147,7 @@
     <string name="copy_lrc_contents">Copy LRC contents ⎘</string>
     <string name="copy_error">Copy error ⎘</string>
     <string name="save">Save</string>
+    <string name="save_as">Save as</string>
 
     <string name="made_with_love_and_code_text">\nMade with ♥\n(and a lot of code :p)\n</string> <!-- Newlines for better spacing on small screens -->
     <string name="rate_and_feedback_text">This app is made and maintained by just me\nPlease rate the app and provide constructive feedback\n\n\nThank You!\n♥</string>

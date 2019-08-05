@@ -172,4 +172,5 @@
     <string name="whoops_error">oops! Um erro ocorreu!</string>
     <string name="writing_lyrics_message">Escrevendo as letras do arquivo</string>
     <string name="yes">Sim</string>
+    <string name="save_as">Salvar como</string>
 </resources>
