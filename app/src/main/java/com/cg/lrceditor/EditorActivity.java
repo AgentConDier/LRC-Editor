@@ -63,6 +63,7 @@ public class EditorActivity extends AppCompatActivity implements LyricListAdapte
     private boolean changedData = false;
     private boolean startedTimeUpdate = false;
     private boolean mediaplayerIsCollapsed = false;
+    private boolean loadMediaPlayerOnCreateMenu = false;
 
     private boolean isDarkTheme = false;
 
@@ -341,7 +342,14 @@ public class EditorActivity extends AppCompatActivity implements LyricListAdapte
         flasher.post(flash);
 
         if (songUri != null) {
-            readyUpMediaPlayer(songUri);
+            /** Race Condition: If the media player manages to load before the menu, the reference
+             *  to playbackOptions in onPrepared will crash the app with a null object reference.
+             */
+            if (playbackOptions != null) {
+                readyUpMediaPlayer(songUri);
+            } else {
+                loadMediaPlayerOnCreateMenu = true;
+            }
         }
     }
 
@@ -1419,6 +1427,11 @@ public class EditorActivity extends AppCompatActivity implements LyricListAdapte
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_editor_activity, menu);
         playbackOptions = menu.findItem(R.id.action_playback_options);
+
+        if (loadMediaPlayerOnCreateMenu) {
+            loadMediaPlayerOnCreateMenu = false;
+            readyUpMediaPlayer(songUri);
+        }
 
         return super.onCreateOptionsMenu(menu);
     }
