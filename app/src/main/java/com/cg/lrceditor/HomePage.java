@@ -684,6 +684,7 @@ public class HomePage extends AppCompatActivity implements HomePageListAdapter.L
                             intent.putExtra("LYRICS", r.getLyrics());
                             intent.putExtra("TIMESTAMPS", r.getTimestamps());
                             intent.putExtra("SONG METADATA", r.getSongMetaData());
+                            intent.putExtra("LRC URI", r.getLrcUri());
                             intent.putExtra("LRC FILE NAME", fileName);
 
                             startActivity(intent);

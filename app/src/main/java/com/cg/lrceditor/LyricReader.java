@@ -215,4 +215,8 @@ public class LyricReader {
     public SongMetaData getSongMetaData() {
         return songMetaData;
     }
+
+    public Uri getLrcUri() {
+        return Uri.fromFile(file);
+    }
 }

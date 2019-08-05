@@ -66,6 +66,7 @@ public class EditorActivity extends AppCompatActivity implements LyricListAdapte
 
     private boolean isDarkTheme = false;
 
+    private Uri lrcUri = null;
     private String lrcFileName = null;
     private Uri songUri = null;
     private String songFileName = null;
@@ -266,6 +267,7 @@ public class EditorActivity extends AppCompatActivity implements LyricListAdapte
                             ArrayList<LyricItem> lyricData = populateDataSet(lyrics, timestamps, false);
 
                             songMetaData = r.getSongMetaData();
+                            lrcUri = intent.getData();
                             lrcFileName = FileUtil.getFileName(ctx, intent.getData());
 
                             adapter = new LyricListAdapter(ctx, lyricData, isDarkTheme);
@@ -292,6 +294,22 @@ public class EditorActivity extends AppCompatActivity implements LyricListAdapte
 
             songMetaData = (SongMetaData) intent.getSerializableExtra("SONG METADATA");
             lrcFileName = intent.getStringExtra("LRC FILE NAME");
+
+            if (intent.getParcelableExtra("SONG URI") != null ) {
+                songUri = intent.getParcelableExtra(("SONG URI"));
+            } else if (intent.getStringExtra("SONG URI") != null) {
+                songUri = Uri.parse(intent.getStringExtra("SONG URI"));
+            }
+
+            if (intent.getParcelableExtra("LRC URI") != null ) {
+                lrcUri = intent.getParcelableExtra(("LRC URI"));
+            } else if (intent.getStringExtra("LRC URI") != null) {
+                lrcUri = Uri.parse(intent.getStringExtra("LRC URI"));
+            }
+
+            if (lrcUri != null && lrcFileName == null) {
+                lrcFileName = FileUtil.getFileName(this, lrcUri);
+            }
 
             adapter = new LyricListAdapter(this, lyricData, isDarkTheme);
             adapter.setClickListener(this);
@@ -321,6 +339,10 @@ public class EditorActivity extends AppCompatActivity implements LyricListAdapte
         seekbar.setOnSeekBarChangeListener(this);
 
         flasher.post(flash);
+
+        if (songUri != null) {
+            readyUpMediaPlayer(songUri);
+        }
     }
 
     private ArrayList<LyricItem> populateDataSet(String[] lyrics, Timestamp[] timestamps, boolean insertStartAndEndTimes) {
@@ -1419,6 +1441,7 @@ public class EditorActivity extends AppCompatActivity implements LyricListAdapte
                     intent.putExtra("SONG URI", songUri);
                     intent.putExtra("SONG METADATA", songMetaData);
                     intent.putExtra("SONG FILE NAME", songFileName);
+                    intent.putExtra("LRC URI", lrcUri);
                     intent.putExtra("LRC FILE NAME", lrcFileName);
 
                     startActivity(intent);
